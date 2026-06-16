@@ -31,6 +31,7 @@ type FirestoreProduct = {
   description?: string
   images?: string[]
   colors?: { id?: string; label?: string; hex?: string }[]
+  colorImages?: Record<string, string[]>
   sizes?: string[]
 }
 
@@ -97,6 +98,22 @@ const ProductPage = () => {
                 hex: c.hex ?? "#888888",
               }))
             detail.colors = mapped
+            if (data.colorImages && typeof data.colorImages === "object") {
+              const byColor: Record<string, string[]> = {}
+              mapped.forEach((color) => {
+                const candidates = data.colorImages?.[color.id]
+                if (Array.isArray(candidates) && candidates.length > 0) {
+                  byColor[color.id] = candidates.slice(0, 3)
+                }
+              })
+              if (Object.keys(byColor).length > 0) {
+                detail.imagesByColor = byColor
+                const firstSet = byColor[mapped[0]!.id]
+                if (firstSet && firstSet.length > 0) {
+                  detail.images = firstSet
+                }
+              }
+            }
           }
           if (Array.isArray(data.sizes) && data.sizes.length > 0) {
             detail.sizes = data.sizes.slice(0, 5)
@@ -191,11 +208,13 @@ const ProductPage = () => {
       )
     : 0
 
-  const mainImage = product.images[activeImage] ?? product.imageUrl
-
   const selectedColor = product.colors.find((c) => c.id === selectedColorId)
   const colorLabel = selectedColor?.label ?? product.colors[0]?.label ?? "—"
   const sizeForCart = selectedSize ?? product.sizes[0] ?? ""
+  const currentImages = selectedColorId
+    ? product.imagesByColor?.[selectedColorId] ?? product.images
+    : product.images
+  const mainImage = currentImages[activeImage] ?? currentImages[0] ?? product.imageUrl
 
   const handleAddToCart = () => {
     if (!isProductSource(sourceParam) || !idParam) return
@@ -204,7 +223,7 @@ const ProductPage = () => {
       productId: idParam,
       source: sourceParam,
       name: product.name,
-      imageUrl: product.imageUrl,
+      imageUrl: mainImage,
       unitPrice: product.price,
       size: sizeForCart,
       colorLabel,
@@ -234,7 +253,7 @@ const ProductPage = () => {
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
             <div className="flex flex-row gap-3 sm:flex-col sm:gap-3">
-              {product.images.map((src, i) => (
+              {currentImages.map((src, i) => (
                 <button
                   key={`${src}-${i}`}
                   type="button"
@@ -297,7 +316,10 @@ const ProductPage = () => {
                       key={c.id}
                       type="button"
                       title={c.label}
-                      onClick={() => setSelectedColorId(c.id)}
+                      onClick={() => {
+                        setSelectedColorId(c.id)
+                        setActiveImage(0)
+                      }}
                       className={cn(
                         "flex size-11 items-center justify-center rounded-full border-2 transition-shadow",
                         selected
@@ -330,7 +352,7 @@ const ProductPage = () => {
                       type="button"
                       onClick={() => setSelectedSize(size)}
                       className={cn(
-                        "min-w-[3.25rem] rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                        "min-w-13 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
                         selected
                           ? "border-foreground bg-foreground text-background"
                           : "border-border bg-muted text-foreground hover:bg-muted/80",
@@ -353,7 +375,7 @@ const ProductPage = () => {
                 >
                   −
                 </button>
-                <span className="min-w-[1.5rem] text-center tabular-nums">
+                <span className="min-w-6 text-center tabular-nums">
                   {quantity}
                 </span>
                 <button

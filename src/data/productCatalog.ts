@@ -24,6 +24,7 @@ export type ProductFAQ = {
 
 export type ProductDetailData = ProductItem & {
   images: string[]
+  imagesByColor?: Record<string, string[]>
   description: string
   colors: ProductColor[]
   sizes: string[]
@@ -41,6 +42,59 @@ const DEFAULT_COLORS: ProductColor[] = [
 ]
 
 const DEFAULT_SIZES = ["S", "M", "L", "XL", "XXL"] as const
+
+function inferProductKeyword(name: string) {
+  const lower = name.toLowerCase()
+  if (lower.includes("jeans")) return "jeans"
+  if (lower.includes("shirt")) return "shirt"
+  if (lower.includes("short")) return "shorts"
+  return "tshirt"
+}
+
+function makeColorImages(keyword: string, color: string) {
+  const c = color.toLowerCase()
+
+  const byKeyword: Record<string, string[]> = {
+    tshirt: [
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1618354691373-d851c564c113?auto=format&fit=crop&w=900&q=80",
+    ],
+    shirt: [
+      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1603252109303-2751441dd157?auto=format&fit=crop&w=900&q=80",
+    ],
+    jeans: [
+      "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1475178626620-a4d074967452?auto=format&fit=crop&w=900&q=80",
+    ],
+    shorts: [
+      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=900&q=80",
+    ],
+  }
+
+  const base = byKeyword[keyword] ?? byKeyword.tshirt
+  if (c.includes("white")) return base
+  if (c.includes("black")) return [...base].reverse()
+  if (c.includes("navy")) return [base[1]!, base[0]!, base[2]!]
+  if (c.includes("brown")) return [base[2]!, base[0]!, base[1]!]
+  return [base[0]!, base[2]!, base[1]!]
+}
+
+function buildImagesByColor(item: ProductItem, colors: ProductColor[]) {
+  const keyword = inferProductKeyword(item.name)
+  const out: Record<string, string[]> = {}
+
+  colors.forEach((c) => {
+    out[c.id] = makeColorImages(keyword, c.label)
+  })
+
+  return out
+}
 
 const SAMPLE_REVIEWS: ProductReview[] = [
   {
@@ -182,13 +236,17 @@ export function buildProductDetail(item: ProductItem): ProductDetailData {
     "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80"
   const img3 =
     "https://images.unsplash.com/photo-1618354691373-d851c564c113?auto=format&fit=crop&w=800&q=80"
+  const colors = [...DEFAULT_COLORS]
+  const imagesByColor = buildImagesByColor(item, colors)
+  const firstColorImages = imagesByColor[colors[0]!.id] ?? [item.imageUrl, img2, img3]
 
   return {
     ...item,
-    images: [item.imageUrl, img2, img3],
+    images: firstColorImages.slice(0, 3),
+    imagesByColor,
     description:
       "This graphic t-shirt is perfect for any occasion. Crafted from a soft and breathable fabric, it offers superior comfort and style. The vibrant graphic adds a touch of personality. Ideal for layering or wearing solo — durable stitching and a relaxed fit you will reach for again and again.",
-    colors: DEFAULT_COLORS,
+    colors,
     sizes: [...DEFAULT_SIZES],
     reviews: SAMPLE_REVIEWS,
     faqs: SAMPLE_FAQS,

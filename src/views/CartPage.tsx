@@ -60,7 +60,7 @@ const CartPage = () => {
     }
   }
 
-  const checkoutApiBase = import.meta.env.VITE_CHECKOUT_API_URL ?? ""
+  const checkoutApiBase = process.env.NEXT_PUBLIC_CHECKOUT_API_URL ?? ""
 
   const handleCheckout = async () => {
     if (items.length === 0) return

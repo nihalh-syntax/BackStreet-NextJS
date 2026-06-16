@@ -1,5 +1,5 @@
 export const SITE_DISCOUNT_PERCENT = 20
-export const DELIVERY_FEE = 15
+export const DELIVERY_FEE = 10
 
 export type OrderItemForTotal = {
   unitPrice: number

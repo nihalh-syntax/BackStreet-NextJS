@@ -149,7 +149,6 @@
   }
 }
 
-/* Brand marquee: typography inspired by each house’s usual wordmark style */
 .font-brand-luxury {
   font-family: "Cormorant Garamond", ui-serif, Georgia, serif;
   font-weight: 600;
@@ -168,7 +167,6 @@
   letter-spacing: 0.04em;
 }
 
-/* Calvin Klein–style wordmark: geometric sans + wide tracking */
 .font-brand-calvin {
   font-family: Montserrat, ui-sans-serif, system-ui, sans-serif;
   font-weight: 500;
@@ -183,7 +181,6 @@
   }
 }
 
-/* Tommy Hilfiger wordmark: geometric sans, wide tracking (retail lockup style) */
 .font-brand-tommy-wordmark {
   font-family: Outfit, "Gill Sans", "Gill Sans MT", Calibri, "Helvetica Neue", Arial,
     ui-sans-serif, system-ui, sans-serif;
@@ -202,7 +199,6 @@
   }
 }
 
-/* Lacoste-style wordmark: bold geometric sans, retail tracking */
 .font-brand-lacoste {
   font-family: Outfit, "Helvetica Neue", Arial, ui-sans-serif, system-ui, sans-serif;
   font-weight: 600;
