@@ -1,14 +1,17 @@
+"use client"
+
 import { useMemo, useState } from "react"
-import { Link } from "react-router-dom"
+import Link from "next/link"
 import { ArrowRight, ChevronRight, Tag, Trash2 } from "lucide-react"
 
+import {
+  createCheckoutSession,
+  validatePromoCode,
+} from "@/app/actions/checkout"
 import { useCart } from "@/context/CartContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-  computeOrderTotal,
-  SITE_DISCOUNT_PERCENT,
-} from "@/lib/orderTotals"
+import { computeOrderTotal, SITE_DISCOUNT_PERCENT } from "@/lib/orderTotals"
 import { cn } from "@/lib/utils"
 
 function formatMoney(n: number) {
@@ -20,18 +23,19 @@ function formatMoney(n: number) {
   })
 }
 
-const CartPage = () => {
+export function CartPageClient() {
   const {
     items,
     removeItem,
     setLineQuantity,
     appliedPromo,
-    applyPromo,
+    setPromo,
     clearPromo,
   } = useCart()
 
   const [promoInput, setPromoInput] = useState("")
   const [promoMessage, setPromoMessage] = useState<string | null>(null)
+  const [promoLoading, setPromoLoading] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
 
@@ -41,58 +45,54 @@ const CartPage = () => {
         unitPrice: i.unitPrice,
         quantity: i.quantity,
       })),
-      appliedPromo?.code ?? null,
+      appliedPromo?.discount ?? 0,
     )
-  }, [items, appliedPromo?.code])
+  }, [items, appliedPromo?.discount])
 
-  const handleApplyPromo = () => {
+  const handleApplyPromo = async () => {
     setPromoMessage(null)
     if (!promoInput.trim()) {
       setPromoMessage("Enter a code")
       return
     }
-    const ok = applyPromo(promoInput)
-    if (ok) {
-      setPromoMessage(`Applied ${promoInput.trim().toUpperCase()}`)
-      setPromoInput("")
-    } else {
-      setPromoMessage("Invalid code. Try SAVE10 or WELCOME.")
+
+    setPromoLoading(true)
+    try {
+      const result = await validatePromoCode(promoInput)
+      if (result.ok) {
+        setPromo({ code: result.code, discount: result.discountFlat })
+        setPromoMessage(`Applied ${result.code}`)
+        setPromoInput("")
+      } else {
+        setPromoMessage(result.error)
+      }
+    } finally {
+      setPromoLoading(false)
     }
   }
-
-  const checkoutApiBase = process.env.NEXT_PUBLIC_CHECKOUT_API_URL ?? ""
 
   const handleCheckout = async () => {
     if (items.length === 0) return
     setCheckoutError(null)
     setCheckoutLoading(true)
     try {
-      const res = await fetch(
-        `${checkoutApiBase}/api/create-checkout-session`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            items: items.map((i) => ({
-              unitPrice: i.unitPrice,
-              quantity: i.quantity,
-            })),
-            promoCode: appliedPromo?.code ?? null,
-          }),
-        },
+      const result = await createCheckoutSession(
+        items.map((i) => ({
+          productId: i.productId,
+          source: i.source,
+          unitPrice: i.unitPrice,
+          quantity: i.quantity,
+          size: i.size,
+          colorLabel: i.colorLabel,
+        })),
+        appliedPromo?.code ?? null,
       )
-      const data = (await res.json().catch(() => ({}))) as {
-        error?: string
-        url?: string
+
+      if (!result.ok) {
+        throw new Error(result.error)
       }
-      if (!res.ok) {
-        throw new Error(data.error ?? "Checkout failed")
-      }
-      if (typeof data.url === "string" && data.url.length > 0) {
-        window.location.assign(data.url)
-        return
-      }
-      throw new Error("No checkout URL returned")
+
+      window.location.assign(result.url)
     } catch (e) {
       setCheckoutError(e instanceof Error ? e.message : "Checkout failed")
     } finally {
@@ -107,7 +107,7 @@ const CartPage = () => {
           className="mb-8 flex flex-wrap items-center gap-1 text-sm text-muted-foreground"
           aria-label="Breadcrumb"
         >
-          <Link to="/" className="hover:text-foreground">
+          <Link href="/" className="hover:text-foreground">
             Home
           </Link>
           <ChevronRight className="size-4 shrink-0" aria-hidden />
@@ -122,7 +122,7 @@ const CartPage = () => {
           <div className="mt-10 rounded-2xl border border-border bg-background p-10 text-center shadow-sm">
             <p className="text-muted-foreground">Your cart is empty.</p>
             <Button asChild className="mt-6 rounded-full">
-              <Link to="/">Continue shopping</Link>
+              <Link href="/">Continue shopping</Link>
             </Button>
           </div>
         ) : (
@@ -265,9 +265,10 @@ const CartPage = () => {
                   <Button
                     type="button"
                     className="h-11 shrink-0 rounded-full px-6 font-semibold"
-                    onClick={handleApplyPromo}
+                    disabled={promoLoading}
+                    onClick={() => void handleApplyPromo()}
                   >
-                    Apply
+                    {promoLoading ? "Checking…" : "Apply"}
                   </Button>
                 </div>
                 {appliedPromo && (
@@ -314,5 +315,3 @@ const CartPage = () => {
     </div>
   )
 }
-
-export default CartPage

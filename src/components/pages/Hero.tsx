@@ -1,5 +1,7 @@
 // Hero Page is the main page of the website
 
+"use client"
+
 import { useId, useState } from "react"
 import { Button } from "../ui/button"
 

@@ -1,3 +1,5 @@
+"use client"
+
 import {
   createContext,
   useCallback,
@@ -9,7 +11,6 @@ import {
 } from "react"
 
 import type { ProductSource } from "@/data/productCatalog"
-import { promoDiscountFromCode } from "@/lib/orderTotals"
 
 const STORAGE_KEY = "backstreet-cart"
 
@@ -102,8 +103,9 @@ type CartContextValue = {
   removeItem: (lineKey: string) => void
   setLineQuantity: (lineKey: string, quantity: number) => void
   appliedPromo: { code: string; discount: number } | null
-  applyPromo: (code: string) => boolean
+  setPromo: (promo: { code: string; discount: number } | null) => void
   clearPromo: () => void
+  clearCart: () => void
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -221,17 +223,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
-  const applyPromo = useCallback((code: string) => {
-    const normalized = code.trim().toUpperCase()
-    const d = promoDiscountFromCode(normalized)
-    if (d > 0) {
-      setAppliedPromo({ code: normalized, discount: d })
-      return true
-    }
-    return false
-  }, [])
+  const setPromo = useCallback(
+    (promo: { code: string; discount: number } | null) => {
+      setAppliedPromo(promo)
+    },
+    [],
+  )
 
   const clearPromo = useCallback(() => setAppliedPromo(null), [])
+
+  const clearCart = useCallback(() => {
+    setItems([])
+    setAppliedPromo(null)
+  }, [])
 
   const itemCount = useMemo(
     () => items.reduce((acc, l) => acc + l.quantity, 0),
@@ -246,8 +250,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem,
       setLineQuantity,
       appliedPromo,
-      applyPromo,
+      setPromo,
       clearPromo,
+      clearCart,
     }),
     [
       items,
@@ -256,8 +261,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem,
       setLineQuantity,
       appliedPromo,
-      applyPromo,
+      setPromo,
       clearPromo,
+      clearCart,
     ],
   )
 

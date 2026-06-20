@@ -1,202 +1,44 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { Link, useParams } from "react-router-dom"
-import { doc, getDoc } from "firebase/firestore"
+"use client"
+
+import { useState } from "react"
+import Link from "next/link"
 import { ChevronRight, Filter, MoreVertical } from "lucide-react"
 
-import { db } from "../../firebase/config"
-import ProductCard, { type ProductItem } from "@/components/ProductCard"
+import ProductCard from "@/components/ProductCard"
 import StarRating from "@/components/ui/StarRating"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import {
-  type ProductDetailData,
-  type ProductSource,
-  buildProductDetail,
-  findFallbackProduct,
-  NEW_ARRIVALS_FALLBACK,
-  TOP_SELLING_FALLBACK,
-} from "@/data/productCatalog"
+import type { ProductDetailData, ProductSource } from "@/data/productCatalog"
 import { useCart } from "@/context/CartContext"
+import type { RelatedProduct } from "@/lib/data/products"
+import { productDetailPath } from "@/lib/productRoutes"
+import { cn } from "@/lib/utils"
 
 type TabId = "details" | "reviews" | "faqs"
 
-type FirestoreProduct = {
-  name?: string
-  imageUrl?: string
-  image?: string
-  rating?: number
-  price?: number
-  originalPrice?: number
-  description?: string
-  images?: string[]
-  colors?: { id?: string; label?: string; hex?: string }[]
-  colorImages?: Record<string, string[]>
-  sizes?: string[]
+type ProductDetailClientProps = {
+  product: ProductDetailData
+  source: ProductSource
+  legacyId: string
+  relatedProducts: RelatedProduct[]
 }
 
-function isProductSource(value: string | undefined): value is ProductSource {
-  return value === "newArrivals" || value === "topSelling"
-}
-
-const ProductPage = () => {
+export function ProductDetailClient({
+  product,
+  source,
+  legacyId,
+  relatedProducts,
+}: ProductDetailClientProps) {
   const { addItem } = useCart()
-  const { source: sourceParam, id: idParam } = useParams<{
-    source: string
-    id: string
-  }>()
-
-  const [product, setProduct] = useState<ProductDetailData | null>(null)
-  const [loading, setLoading] = useState(true)
   const [activeImage, setActiveImage] = useState(0)
   const [activeTab, setActiveTab] = useState<TabId>("reviews")
-  const [selectedColorId, setSelectedColorId] = useState<string | null>(null)
-  const [selectedSize, setSelectedSize] = useState<string | null>(null)
+  const [selectedColorId, setSelectedColorId] = useState<string | null>(
+    product.colors[0]?.id ?? null,
+  )
+  const [selectedSize, setSelectedSize] = useState<string | null>(
+    product.sizes[1] ?? product.sizes[0] ?? null,
+  )
   const [quantity, setQuantity] = useState(1)
-
-  const loadProduct = useCallback(async () => {
-    if (!idParam || !isProductSource(sourceParam)) {
-      setProduct(null)
-      setLoading(false)
-      return
-    }
-
-    setLoading(true)
-    try {
-      const collectionName =
-        sourceParam === "newArrivals" ? "newArrivals" : "topSelling"
-      const snap = await getDoc(doc(db, collectionName, idParam))
-
-      if (snap.exists()) {
-        const data = snap.data() as FirestoreProduct
-        const imageUrl = data.imageUrl ?? data.image
-        if (data.name && imageUrl && typeof data.price === "number") {
-          const base: ProductItem = {
-            id: snap.id,
-            name: data.name,
-            imageUrl,
-            rating: typeof data.rating === "number" ? data.rating : 4,
-            price: data.price,
-            originalPrice:
-              typeof data.originalPrice === "number"
-                ? data.originalPrice
-                : undefined,
-          }
-          const detail = buildProductDetail(base)
-          if (Array.isArray(data.images) && data.images.length > 0) {
-            detail.images = data.images.slice(0, 5)
-          }
-          if (typeof data.description === "string" && data.description.trim()) {
-            detail.description = data.description
-          }
-          if (Array.isArray(data.colors) && data.colors.length > 0) {
-            const mapped = data.colors
-              .slice(0, 5)
-              .map((c, i) => ({
-                id: c.id ?? `c-${i}`,
-                label: c.label ?? `Color ${i + 1}`,
-                hex: c.hex ?? "#888888",
-              }))
-            detail.colors = mapped
-            if (data.colorImages && typeof data.colorImages === "object") {
-              const byColor: Record<string, string[]> = {}
-              mapped.forEach((color) => {
-                const candidates = data.colorImages?.[color.id]
-                if (Array.isArray(candidates) && candidates.length > 0) {
-                  byColor[color.id] = candidates.slice(0, 3)
-                }
-              })
-              if (Object.keys(byColor).length > 0) {
-                detail.imagesByColor = byColor
-                const firstSet = byColor[mapped[0]!.id]
-                if (firstSet && firstSet.length > 0) {
-                  detail.images = firstSet
-                }
-              }
-            }
-          }
-          if (Array.isArray(data.sizes) && data.sizes.length > 0) {
-            detail.sizes = data.sizes.slice(0, 5)
-          }
-          setProduct(detail)
-          setSelectedColorId(detail.colors[0]?.id ?? null)
-          setSelectedSize(detail.sizes[1] ?? detail.sizes[0] ?? null)
-          setActiveImage(0)
-          return
-        }
-      }
-
-      const fallback = findFallbackProduct(sourceParam, idParam)
-      if (fallback) {
-        const detail = buildProductDetail(fallback)
-        setProduct(detail)
-        setSelectedColorId(detail.colors[0]?.id ?? null)
-        setSelectedSize(detail.sizes[1] ?? detail.sizes[0] ?? null)
-        setActiveImage(0)
-        return
-      }
-
-      setProduct(null)
-    } catch (e) {
-      console.error(e)
-      const fallback = findFallbackProduct(
-        sourceParam as ProductSource,
-        idParam,
-      )
-      if (fallback) {
-        const detail = buildProductDetail(fallback)
-        setProduct(detail)
-        setSelectedColorId(detail.colors[0]?.id ?? null)
-        setSelectedSize(detail.sizes[1] ?? detail.sizes[0] ?? null)
-      } else {
-        setProduct(null)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }, [idParam, sourceParam])
-
-  useEffect(() => {
-    void loadProduct()
-  }, [loadProduct])
-
-  const youMightAlsoLike = useMemo(() => {
-    const pool = [
-      ...NEW_ARRIVALS_FALLBACK.map((p) => ({ ...p, source: "newArrivals" as const })),
-      ...TOP_SELLING_FALLBACK.map((p) => ({ ...p, source: "topSelling" as const })),
-    ].filter((p) => !(p.id === idParam && p.source === sourceParam))
-    return pool.slice(0, 4)
-  }, [idParam, sourceParam])
-
-  if (!isProductSource(sourceParam) || !idParam) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-16 text-center">
-        <p className="text-muted-foreground">Invalid product link.</p>
-        <Button asChild className="mt-4" variant="outline">
-          <Link to="/">Back to home</Link>
-        </Button>
-      </div>
-    )
-  }
-
-  if (loading) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-24 text-center text-muted-foreground">
-        Loading product…
-      </div>
-    )
-  }
-
-  if (!product) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-16 text-center">
-        <p className="text-muted-foreground">Product not found.</p>
-        <Button asChild className="mt-4" variant="outline">
-          <Link to="/">Back to home</Link>
-        </Button>
-      </div>
-    )
-  }
 
   const hasDiscount =
     typeof product.originalPrice === "number" &&
@@ -204,7 +46,8 @@ const ProductPage = () => {
 
   const discountPercent = hasDiscount
     ? Math.round(
-        ((product.originalPrice! - product.price) / product.originalPrice!) * 100,
+        ((product.originalPrice! - product.price) / product.originalPrice!) *
+          100,
       )
     : 0
 
@@ -212,16 +55,16 @@ const ProductPage = () => {
   const colorLabel = selectedColor?.label ?? product.colors[0]?.label ?? "—"
   const sizeForCart = selectedSize ?? product.sizes[0] ?? ""
   const currentImages = selectedColorId
-    ? product.imagesByColor?.[selectedColorId] ?? product.images
+    ? (product.imagesByColor?.[selectedColorId] ?? product.images)
     : product.images
-  const mainImage = currentImages[activeImage] ?? currentImages[0] ?? product.imageUrl
+  const mainImage =
+    currentImages[activeImage] ?? currentImages[0] ?? product.imageUrl
 
   const handleAddToCart = () => {
-    if (!isProductSource(sourceParam) || !idParam) return
     const colorId = selectedColorId ?? product.colors[0]?.id ?? "default"
     addItem({
-      productId: idParam,
-      source: sourceParam,
+      productId: legacyId,
+      source,
       name: product.name,
       imageUrl: mainImage,
       unitPrice: product.price,
@@ -239,7 +82,7 @@ const ProductPage = () => {
           className="mb-8 flex flex-wrap items-center gap-1 text-sm text-muted-foreground"
           aria-label="Breadcrumb"
         >
-          <Link to="/" className="hover:text-foreground">
+          <Link href="/" className="hover:text-foreground">
             Home
           </Link>
           <ChevronRight className="size-4 shrink-0" aria-hidden />
@@ -443,7 +286,11 @@ const ProductPage = () => {
                   All Reviews ({product.reviews.length})
                 </h3>
                 <div className="flex flex-wrap items-center gap-3">
-                  <Button variant="outline" size="icon-sm" aria-label="Filter reviews">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    aria-label="Filter reviews"
+                  >
                     <Filter className="size-4" />
                   </Button>
                   <select
@@ -499,8 +346,13 @@ const ProductPage = () => {
           {activeTab === "faqs" && (
             <div className="max-w-3xl space-y-6">
               {product.faqs.map((faq, i) => (
-                <div key={i} className="border-b border-border pb-4 last:border-0">
-                  <h4 className="font-semibold text-foreground">{faq.question}</h4>
+                <div
+                  key={i}
+                  className="border-b border-border pb-4 last:border-0"
+                >
+                  <h4 className="font-semibold text-foreground">
+                    {faq.question}
+                  </h4>
                   <p className="mt-2 text-sm text-muted-foreground md:text-base">
                     {faq.answer}
                   </p>
@@ -515,11 +367,11 @@ const ProductPage = () => {
             You might also like
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {youMightAlsoLike.map((p) => (
+            {relatedProducts.map((p) => (
               <ProductCard
                 key={`${p.source}-${p.id}`}
                 product={p}
-                href={`/product/${p.source}/${encodeURIComponent(p.id)}`}
+                href={productDetailPath(p.source, p.id)}
               />
             ))}
           </div>
@@ -528,5 +380,3 @@ const ProductPage = () => {
     </div>
   )
 }
-
-export default ProductPage

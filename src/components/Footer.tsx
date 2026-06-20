@@ -1,10 +1,7 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { Facebook, Github, Instagram, Mail } from "lucide-react"
+import Link from "next/link"
+import { Facebook, Github, Instagram } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+import { FooterNewsletter } from "@/components/FooterNewsletter"
 
 const companyLinks = [
   { label: "About", href: "#" },
@@ -47,52 +44,18 @@ function XIcon({ className }: { className?: string }) {
   )
 }
 
-const Footer = () => {
-  const [email, setEmail] = useState("")
-
+export default function Footer() {
   return (
     <footer className="mt-auto bg-muted/50 text-foreground">
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
-        <div
-          className={cn(
-            "-mt-16 flex flex-col gap-8 rounded-3xl bg-black px-6 py-10 text-white md:-mt-20 md:flex-row md:items-center md:justify-between md:gap-10 md:px-10 md:py-12 lg:px-14",
-          )}
-        >
-          <h2 className="max-w-xl text-3xl font-black uppercase leading-tight tracking-tight md:text-4xl lg:text-[2.25rem]">
-            Stay upto date about our latest offers
-          </h2>
-          <div className="flex w-full max-w-md flex-col gap-3 md:shrink-0">
-            <div className="relative">
-              <Mail
-                className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
-                aria-hidden
-              />
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email address"
-                className="h-12 rounded-full border-0 bg-white pl-12 pr-4 text-neutral-950 placeholder:text-neutral-500"
-                aria-label="Email for newsletter"
-              />
-            </div>
-            <Button
-              type="button"
-              variant="secondary"
-              className="h-12 rounded-full bg-white font-semibold text-neutral-950 hover:bg-neutral-100"
-              onClick={(e) => e.preventDefault()}
-            >
-              Subscribe to Newsletter
-            </Button>
-          </div>
-        </div>
+        <FooterNewsletter />
       </div>
 
       <div className="mx-auto max-w-7xl px-4 pb-10 pt-16 sm:px-6 md:pt-20 lg:px-8">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-6 lg:gap-8">
           <div className="sm:col-span-2 lg:col-span-2">
             <Link
-              to="/"
+              href="/"
               className="text-2xl font-black tracking-tight text-foreground"
             >
               BackStreet
@@ -235,5 +198,3 @@ const Footer = () => {
     </footer>
   )
 }
-
-export default Footer

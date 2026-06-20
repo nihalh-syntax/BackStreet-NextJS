@@ -1,25 +1,18 @@
-import { useMemo } from "react"
-import { Link } from "react-router-dom"
+import Link from "next/link"
 
 import ProductGrid from "./ProductGrid"
 import { Button } from "./ui/button"
-import { useFirestoreProducts } from "@/hooks/useFirestoreProducts"
-import { NEW_ARRIVALS_FALLBACK } from "@/data/productCatalog"
+import type { ProductItem } from "./ProductCard"
 
-const NewArrivalsSection = () => {
-  const { products } = useFirestoreProducts({
-    collectionName: "newArrivals",
-    maxProducts: 8,
-    fallback: NEW_ARRIVALS_FALLBACK,
-  })
+type NewArrivalsSectionProps = {
+  products: ProductItem[]
+}
 
-  const displayProducts = useMemo(() => products.slice(0, 4), [products])
+const NewArrivalsSection = ({ products }: NewArrivalsSectionProps) => {
+  const displayProducts = products.slice(0, 4)
 
   return (
-    <section
-      id="new-arrivals"
-      className="scroll-mt-24 bg-background"
-    >
+    <section id="new-arrivals" className="scroll-mt-24 bg-background">
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14">
         <h2 className="text-center text-4xl font-black uppercase tracking-tight text-foreground md:text-5xl">
           New Arrivals
@@ -39,7 +32,7 @@ const NewArrivalsSection = () => {
             variant="outline"
             className="h-11 rounded-full border-border bg-transparent px-10 text-sm font-medium"
           >
-            <Link to="/arrivals">View All</Link>
+            <Link href="/arrivals">View All</Link>
           </Button>
         </div>
       </div>

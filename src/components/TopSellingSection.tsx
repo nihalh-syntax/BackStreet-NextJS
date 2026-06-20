@@ -1,25 +1,18 @@
-import { useMemo } from "react"
-import { Link } from "react-router-dom"
+import Link from "next/link"
 
 import ProductGrid from "./ProductGrid"
 import { Button } from "./ui/button"
-import { useFirestoreProducts } from "@/hooks/useFirestoreProducts"
-import { TOP_SELLING_FALLBACK } from "@/data/productCatalog"
+import type { ProductItem } from "./ProductCard"
 
-const TopSellingSection = () => {
-  const { products } = useFirestoreProducts({
-    collectionName: "topSelling",
-    maxProducts: 8,
-    fallback: TOP_SELLING_FALLBACK,
-  })
+type TopSellingSectionProps = {
+  products: ProductItem[]
+}
 
-  const displayProducts = useMemo(() => products.slice(0, 4), [products])
+const TopSellingSection = ({ products }: TopSellingSectionProps) => {
+  const displayProducts = products.slice(0, 4)
 
   return (
-    <section
-      id="top-selling"
-      className="scroll-mt-24 bg-background"
-    >
+    <section id="top-selling" className="scroll-mt-24 bg-background">
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14">
         <h2 className="text-center text-4xl font-black uppercase tracking-tight text-foreground md:text-5xl">
           Top Selling
@@ -39,7 +32,7 @@ const TopSellingSection = () => {
             variant="outline"
             className="h-11 rounded-full border-border bg-transparent px-10 text-sm font-medium"
           >
-            <Link to="/top-selling">View All</Link>
+            <Link href="/top-selling">View All</Link>
           </Button>
         </div>
       </div>

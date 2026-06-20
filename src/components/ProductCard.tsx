@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import StarRating from "@/components/ui/StarRating"
@@ -59,7 +59,7 @@ const ProductCard = ({ product, href }: ProductCardProps) => {
   if (href) {
     return (
       <Link
-        to={href}
+        href={href}
         className="group flex min-w-0 flex-col gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {inner}

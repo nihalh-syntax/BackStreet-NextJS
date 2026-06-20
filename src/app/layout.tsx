@@ -1,12 +1,17 @@
 import type { Metadata } from "next"
 import Script from "next/script"
+import { Analytics } from "@vercel/analytics/next"
 
+import { Providers } from "@/components/providers"
 import { APP_THEME_STORAGE_KEY } from "@/theme/constants"
 
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "BackStreet",
+  title: {
+    default: "BackStreet",
+    template: "%s | BackStreet",
+  },
   description: "Premium streetwear and fashion.",
 }
 
@@ -29,7 +34,8 @@ export default function RootLayout({
   } catch (_) {}
 })();`}
         </Script>
-        {children}
+        <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   )

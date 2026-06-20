@@ -1,6 +1,10 @@
+"use client"
+
 import { Search, ShoppingCart, User } from "lucide-react"
-import { SignInButton, UserButton, useAuth } from "@clerk/react"
-import { Link, useNavigate } from "react-router-dom"
+import { SignInButton, UserButton, useAuth } from "@clerk/nextjs"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+
 import ModeToggle from "./ModeToggle"
 import { useCart } from "@/context/CartContext"
 
@@ -17,12 +21,12 @@ const SECTION_IDS = {
 const NavBar = () => {
   const { isSignedIn } = useAuth()
   const { itemCount } = useCart()
-  const navigate = useNavigate()
+  const router = useRouter()
 
   const goToHomeSection =
     (sectionId: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault()
-      void navigate({ pathname: "/", hash: sectionId })
+      router.push(`/#${sectionId}`)
     }
 
   return (
@@ -30,7 +34,7 @@ const NavBar = () => {
       <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 md:gap-8 md:px-6">
         <div className="flex shrink-0 items-center gap-6 md:gap-8">
           <Link
-            to="/"
+            href="/"
             className="text-lg font-bold tracking-tight text-foreground md:text-xl"
           >
             BackStreet
@@ -86,7 +90,7 @@ const NavBar = () => {
         <div className="flex shrink-0 items-center gap-2 md:gap-3">
           <ModeToggle />
           <Link
-            to="/cart"
+            href="/cart"
             className="relative inline-flex size-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted"
             aria-label="Shopping cart"
           >
