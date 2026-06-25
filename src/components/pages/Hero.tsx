@@ -2,7 +2,14 @@
 
 "use client"
 
-import { useId, useState } from "react"
+import { useEffect, useId, useState } from "react"
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+} from "motion/react"
 import { Button } from "../ui/button"
 
 const HERO_IMAGE =
@@ -233,6 +240,83 @@ function FourPointStar({ className }: { className?: string }) {
   )
 }
 
+const HEADLINES = [
+  "Find clothes that matches your style",
+  "Top Brands to choose from to suit your vibe",
+  "Keeping the trend real in this everchanging world of fashion",
+]
+
+/** Cycles through headlines, typing and deleting each with a blinking caret. */
+function TypewriterHeadline({ texts }: { texts: string[] }) {
+  const prefersReducedMotion = useReducedMotion()
+  const [index, setIndex] = useState(0)
+  const text = texts[index]
+  const count = useMotionValue(0)
+  const rounded = useTransform(count, (value) => Math.round(value))
+  const typed = useTransform(rounded, (value) => text.slice(0, value))
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      count.set(text.length)
+      return
+    }
+
+    let cancelled = false
+    let controls: ReturnType<typeof animate> | undefined
+    let holdTimer: ReturnType<typeof setTimeout> | undefined
+    count.set(0)
+
+    const run = async () => {
+      controls = animate(count, text.length, {
+        duration: Math.max(text.length * 0.06, 0.6),
+        ease: "linear",
+        delay: 0.2,
+      })
+      await controls
+      if (cancelled) return
+
+      await new Promise<void>((resolve) => {
+        holdTimer = setTimeout(resolve, 1600)
+      })
+      if (cancelled || texts.length < 2) return
+
+      controls = animate(count, 0, {
+        duration: Math.max(text.length * 0.03, 0.3),
+        ease: "linear",
+      })
+      await controls
+      if (cancelled) return
+
+      setIndex((current) => (current + 1) % texts.length)
+    }
+
+    run()
+
+    return () => {
+      cancelled = true
+      controls?.stop()
+      if (holdTimer) clearTimeout(holdTimer)
+    }
+  }, [text, texts, count, prefersReducedMotion])
+
+  return (
+    <span aria-label={text}>
+      <motion.span aria-hidden>{typed}</motion.span>
+      <motion.span
+        aria-hidden
+        className="ml-1 inline-block h-[0.8em] w-[3px] translate-y-[0.08em] bg-foreground align-baseline"
+        animate={prefersReducedMotion ? undefined : { opacity: [1, 1, 0, 0] }}
+        transition={{
+          duration: 0.9,
+          repeat: Infinity,
+          ease: "linear",
+          times: [0, 0.5, 0.5, 1],
+        }}
+      />
+    </span>
+  )
+}
+
 const Hero = () => {
   const clipId = useId().replace(/:/g, "")
 
@@ -243,8 +327,8 @@ const Hero = () => {
     >
       <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 pb-2 pt-8 md:gap-10 md:px-6 md:pb-3 md:pt-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-12 lg:pb-3 lg:pt-12">
         <div className="flex flex-col gap-6 md:gap-8">
-          <h1 className="max-w-xl font-sans text-[2.25rem] font-black uppercase leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-[3.25rem] lg:text-[3.5rem]">
-            Find clothes that matches your style
+          <h1 className="min-h-[3.3em] max-w-xl font-sans text-[2.25rem] font-black uppercase leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-[3.25rem] lg:text-[3.5rem]">
+            <TypewriterHeadline texts={HEADLINES} />
           </h1>
           <p className="max-w-lg text-[0.95rem] leading-relaxed text-muted-foreground md:text-base">
             Browse through our diverse range of meticulously crafted garments,
