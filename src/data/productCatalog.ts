@@ -167,11 +167,10 @@ export const NEW_ARRIVALS_FALLBACK: ProductItem[] = [
   },
   {
     id: "fallback-3",
-    name: "Checkered Shirt",
-    imageUrl:
-      "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=700&q=80",
+    name: "Navy Tailored Suit",
+    imageUrl: "/products/navy-suit-front.png",
     rating: 4.5,
-    price: 80,
+    price: 220,
   },
   {
     id: "fallback-4",
@@ -259,6 +258,12 @@ const WHITE_TEE_IMAGES = [
   "/products/white-tee-front.png",
   "/products/white-tee-standing.png",
   "/products/white-tee-detail.png",
+]
+
+const NAVY_SUIT_IMAGES = [
+  "/products/navy-suit-front.png",
+  "/products/navy-suit-walk.png",
+  "/products/navy-suit-detail.png",
 ]
 
 /**
@@ -369,6 +374,27 @@ const CUSTOM_DETAILS: Record<string, ProductDetailData> = {
       "Classic crew neckline that holds its shape",
       "Regular fit that layers easily",
       "Pre-shrunk and machine washable",
+    ],
+  },
+  "fallback-3": {
+    id: "fallback-3",
+    name: "Navy Tailored Suit",
+    imageUrl: "/products/navy-suit-front.png",
+    rating: 4.5,
+    price: 220,
+    images: NAVY_SUIT_IMAGES,
+    imagesByColor: { navy: NAVY_SUIT_IMAGES },
+    description:
+      "A refined navy suit cut from a comfortable stretch-cotton weave that moves with you from the office to evening events. The structured blazer features clean notch lapels and a tailored drape, paired with matching slim-fit trousers for a sharp, modern silhouette.",
+    colors: [{ id: "navy", label: "Navy", hex: "#1f2a44" }],
+    sizes: [...DEFAULT_SIZES],
+    reviews: SAMPLE_REVIEWS,
+    faqs: SAMPLE_FAQS,
+    detailBullets: [
+      "Tailored blazer in a breathable stretch-cotton weave",
+      "Notch lapels with a two-button front",
+      "Fully finished interior for a clean drape",
+      "Pairs with matching slim-fit trousers for a full suit",
     ],
   },
 }

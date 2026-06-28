@@ -122,6 +122,11 @@ export async function getAllProductsWithSource(): Promise<RelatedProduct[]> {
   ]
 }
 
+/** Product slugs to surface first within a given dress-style page. */
+const FEATURED_FIRST_BY_STYLE: Partial<Record<DressStyleId, string[]>> = {
+  formal: ["newArrivals-fallback-3"],
+}
+
 /**
  * Splits the catalog for a dress-style page: products tagged with the style are
  * featured, the rest fall under "more to explore" so the page stays populated.
@@ -134,7 +139,8 @@ export async function getProductsForDressStyle(style: DressStyleId): Promise<{
     orderBy: { createdAt: "desc" },
   })
 
-  const primary: RelatedProduct[] = []
+  const featuredFirst = FEATURED_FIRST_BY_STYLE[style] ?? []
+  const primaryRows: { slug: string; product: RelatedProduct }[] = []
   const more: RelatedProduct[] = []
   for (const product of products) {
     const mapped: RelatedProduct = {
@@ -142,13 +148,23 @@ export async function getProductsForDressStyle(style: DressStyleId): Promise<{
       source: categoryToProductSource(product.category),
     }
     if (product.dressStyle === style) {
-      primary.push(mapped)
+      primaryRows.push({ slug: product.slug, product: mapped })
     } else {
       more.push(mapped)
     }
   }
 
-  return { primary, more }
+  // Stable sort keeps createdAt order, but lifts featured slugs to the front.
+  primaryRows.sort((a, b) => {
+    const ai = featuredFirst.indexOf(a.slug)
+    const bi = featuredFirst.indexOf(b.slug)
+    if (ai === -1 && bi === -1) return 0
+    if (ai === -1) return 1
+    if (bi === -1) return -1
+    return ai - bi
+  })
+
+  return { primary: primaryRows.map((row) => row.product), more }
 }
 
 export async function getRelatedProducts(
