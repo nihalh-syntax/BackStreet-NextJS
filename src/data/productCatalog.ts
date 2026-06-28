@@ -175,12 +175,10 @@ export const NEW_ARRIVALS_FALLBACK: ProductItem[] = [
   },
   {
     id: "fallback-4",
-    name: "Sleeve Striped T-shirt",
-    imageUrl:
-      "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=700&q=80",
+    name: "Essential Crew Neck T-Shirt",
+    imageUrl: "/products/white-tee-front.png",
     rating: 4.5,
-    price: 15,
-    originalPrice: 18,
+    price: 25,
   },
 ]
 
@@ -255,6 +253,12 @@ const HOSSTILE_TEE_IMAGES = [
   "/products/hosstile-tee-front.png",
   "/products/hosstile-tee-back.png",
   "/products/hosstile-tee-lifestyle.png",
+]
+
+const WHITE_TEE_IMAGES = [
+  "/products/white-tee-front.png",
+  "/products/white-tee-standing.png",
+  "/products/white-tee-detail.png",
 ]
 
 /**
@@ -344,6 +348,27 @@ const CUSTOM_DETAILS: Record<string, ProductDetailData> = {
       "Oversized, gym-ready relaxed fit",
       "Bold Hosstile shield print front and back",
       "Ribbed crew neck that keeps its shape",
+    ],
+  },
+  "fallback-4": {
+    id: "fallback-4",
+    name: "Essential Crew Neck T-Shirt",
+    imageUrl: "/products/white-tee-front.png",
+    rating: 4.5,
+    price: 25,
+    images: WHITE_TEE_IMAGES,
+    imagesByColor: { white: WHITE_TEE_IMAGES },
+    description:
+      "The everyday staple done right — a clean crew-neck tee in soft, breathable combed cotton with just the right amount of stretch. Its regular fit and clean finish make it the perfect base layer or stand-alone piece for any look.",
+    colors: [{ id: "white", label: "White", hex: "#f4f4f5" }],
+    sizes: [...DEFAULT_SIZES],
+    reviews: SAMPLE_REVIEWS,
+    faqs: SAMPLE_FAQS,
+    detailBullets: [
+      "Soft, breathable combed cotton with a touch of stretch",
+      "Classic crew neckline that holds its shape",
+      "Regular fit that layers easily",
+      "Pre-shrunk and machine washable",
     ],
   },
 }
