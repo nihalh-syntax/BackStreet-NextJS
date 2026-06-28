@@ -1,11 +1,23 @@
 import { config } from "dotenv"
-import { PrismaClient, ProductCategory } from "@prisma/client"
+import { PrismaClient, ProductCategory, DressStyle } from "@prisma/client"
 
 import {
   NEW_ARRIVALS_FALLBACK,
   TOP_SELLING_FALLBACK,
   buildProductDetail,
 } from "../src/data/productCatalog"
+
+/** Maps each catalog product to a dress style for the Browse-by-Style pages. */
+const DRESS_STYLE_BY_ID: Record<string, DressStyle> = {
+  "fallback-1": DressStyle.casual, // T-shirt with Tape Details
+  "fallback-2": DressStyle.party, // Skinny Fit Jeans
+  "fallback-3": DressStyle.formal, // Checkered Shirt
+  "fallback-4": DressStyle.casual, // Sleeve Striped T-shirt
+  "top-fallback-1": DressStyle.formal, // Vertical Striped Shirt
+  "top-fallback-2": DressStyle.party, // Courage Graphic T-shirt
+  "top-fallback-3": DressStyle.gym, // Loose Fit Bermuda Shorts
+  "top-fallback-4": DressStyle.casual, // Faded Skinny Jeans
+}
 
 config({ path: ".env.local" })
 config({ path: ".env" })
@@ -22,6 +34,7 @@ async function seedProducts(
 ) {
   for (const item of items) {
     const detail = buildProductDetail(item)
+    const dressStyle = DRESS_STYLE_BY_ID[item.id] ?? DressStyle.casual
     await prisma.product.upsert({
       where: { slug: slugFromId(category, item.id) },
       update: {
@@ -31,6 +44,7 @@ async function seedProducts(
         originalPrice: detail.originalPrice ?? null,
         rating: detail.rating,
         category,
+        dressStyle,
         imageUrl: detail.imageUrl,
         images: detail.images,
         imagesByColor: detail.imagesByColor ?? undefined,
@@ -48,6 +62,7 @@ async function seedProducts(
         originalPrice: detail.originalPrice ?? null,
         rating: detail.rating,
         category,
+        dressStyle,
         imageUrl: detail.imageUrl,
         images: detail.images,
         imagesByColor: detail.imagesByColor ?? undefined,

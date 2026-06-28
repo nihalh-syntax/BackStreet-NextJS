@@ -1,64 +1,7 @@
+import Link from "next/link"
+
 import { cn } from "@/lib/utils"
-
-type DressStyle = {
-  id: string
-  title: string
-  imageUrl: string
-  href: string
-  className?: string
-  cardHeightClass?: string
-  imageClassName?: string
-}
-
-const DRESS_STYLES: DressStyle[] = [
-  {
-    id: "casual",
-    title: "Casual",
-    href: "#casual",
-    imageUrl:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80",
-    className: "md:col-span-2",
-    cardHeightClass: "h-52 md:h-56",
-  },
-  {
-    id: "formal",
-    title: "Formal",
-    href: "#formal",
-    imageUrl:
-      "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=1200&q=80",
-    className: "md:col-span-3",
-    cardHeightClass: "h-52 md:h-56",
-    imageClassName: "object-top",
-  },
-  {
-    id: "party",
-    title: "Party",
-    href: "#party",
-    imageUrl:
-      "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1400&q=80",
-    className: "md:col-span-3",
-    cardHeightClass: "h-56 md:h-64",
-  },
-  {
-    id: "gym",
-    title: "Gym",
-    href: "#gym",
-    imageUrl:
-      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80",
-    className: "md:col-span-2",
-    cardHeightClass: "h-56 md:h-64",
-    imageClassName: "object-top",
-  },
-  // {
-  //   id: "vacation",
-  //   title: "Vacation",
-  //   href: "#vacation",
-  //   imageUrl:
-  //     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
-  //   className: "md:col-span-5",
-  //   cardHeightClass: "h-52 md:h-56",
-  // },
-]
+import { DRESS_STYLES, type DressStyle } from "@/lib/dressStyles"
 
 type DressStyleCardProps = {
   style: DressStyle
@@ -66,8 +9,8 @@ type DressStyleCardProps = {
 
 const DressStyleCard = ({ style }: DressStyleCardProps) => {
   return (
-    <a
-      href={style.href}
+    <Link
+      href={`/styles/${style.id}`}
       className={cn(
         "group relative block overflow-hidden rounded-2xl bg-muted",
         style.cardHeightClass ?? "h-52 md:h-56",
@@ -96,7 +39,7 @@ const DressStyleCard = ({ style }: DressStyleCardProps) => {
       >
         {style.title}
       </span>
-    </a>
+    </Link>
   )
 }
 

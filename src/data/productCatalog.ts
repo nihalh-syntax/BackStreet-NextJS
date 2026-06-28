@@ -160,12 +160,10 @@ export const NEW_ARRIVALS_FALLBACK: ProductItem[] = [
   },
   {
     id: "fallback-2",
-    name: "Skinny Fit Jeans",
-    imageUrl:
-      "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=700&q=80",
-    rating: 3.5,
-    price: 40,
-    originalPrice: 60,
+    name: "Floral Patchwork Maxi Dress",
+    imageUrl: "/products/floral-dress-front.png",
+    rating: 4.5,
+    price: 140,
   },
   {
     id: "fallback-3",
@@ -198,10 +196,9 @@ export const TOP_SELLING_FALLBACK: ProductItem[] = [
   },
   {
     id: "top-fallback-2",
-    name: "Courage Graphic T-shirt",
-    imageUrl:
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=700&q=80",
-    rating: 4.0,
+    name: "Palm Tree Embroidered Shirt",
+    imageUrl: "/products/palm-shirt-front.png",
+    rating: 4.5,
     price: 45,
   },
   {
@@ -231,7 +228,73 @@ export function findFallbackProduct(
   return list.find((p) => p.id === id) ?? null
 }
 
+const PALM_SHIRT_IMAGES = [
+  "/products/palm-shirt-front.png",
+  "/products/palm-shirt-model.png",
+  "/products/palm-shirt-detail.png",
+]
+
+const FLORAL_DRESS_IMAGES = [
+  "/products/floral-dress-front.png",
+  "/products/floral-dress-detail.png",
+  "/products/floral-dress-back.png",
+]
+
+/**
+ * Hand-authored detail for products that use real article imagery instead of
+ * the generated Unsplash placeholders. Keyed by product id.
+ */
+const CUSTOM_DETAILS: Record<string, ProductDetailData> = {
+  "top-fallback-2": {
+    id: "top-fallback-2",
+    name: "Palm Tree Embroidered Shirt",
+    imageUrl: "/products/palm-shirt-front.png",
+    rating: 4.5,
+    price: 45,
+    images: PALM_SHIRT_IMAGES,
+    imagesByColor: { navy: PALM_SHIRT_IMAGES },
+    description:
+      "A breezy revere-collar short-sleeve shirt cut from textured pure cotton, finished with a striking palm tree embroidery across the front. The tonal patchwork weave adds quiet depth while staying effortless to style — an easy statement piece for warm evenings and party season.",
+    colors: [{ id: "navy", label: "Navy", hex: "#1f2433" }],
+    sizes: [...DEFAULT_SIZES],
+    reviews: SAMPLE_REVIEWS,
+    faqs: SAMPLE_FAQS,
+    detailBullets: [
+      "Pure cotton with a textured patchwork weave",
+      "Hand-finished palm tree embroidery across the front",
+      "Revere (Cuban) collar with a relaxed short-sleeve fit",
+      "Chest patch pocket and button-through front",
+    ],
+  },
+  "fallback-2": {
+    id: "fallback-2",
+    name: "Floral Patchwork Maxi Dress",
+    imageUrl: "/products/floral-dress-front.png",
+    rating: 4.5,
+    price: 140,
+    images: FLORAL_DRESS_IMAGES,
+    imagesByColor: { ivory: FLORAL_DRESS_IMAGES },
+    description:
+      "A flowing tiered maxi dress in a vivid floral patchwork print, cut from lightweight cotton. Flutter sleeves and a V-neckline sit above an elasticated waist that falls into a sweeping tiered skirt — a romantic, head-turning piece made for warm-weather celebrations.",
+    colors: [{ id: "ivory", label: "Ivory Multi", hex: "#efe6d6" }],
+    sizes: [...DEFAULT_SIZES],
+    reviews: SAMPLE_REVIEWS,
+    faqs: SAMPLE_FAQS,
+    detailBullets: [
+      "Lightweight cotton with an all-over floral patchwork print",
+      "Flutter short sleeves and a flattering V-neckline",
+      "Elasticated waist with a tiered maxi skirt",
+      "Pull-on style with convenient side pockets",
+    ],
+  },
+}
+
 export function buildProductDetail(item: ProductItem): ProductDetailData {
+  const custom = CUSTOM_DETAILS[item.id]
+  if (custom) {
+    return custom
+  }
+
   const img2 =
     "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80"
   const img3 =

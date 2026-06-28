@@ -8,6 +8,7 @@ import type {
   ProductReview,
   ProductSource,
 } from "@/data/productCatalog"
+import { type DressStyleId } from "@/lib/dressStyles"
 import { prisma } from "@/lib/prisma"
 
 export function productSourceToCategory(source: ProductSource): ProductCategory {
@@ -108,6 +109,47 @@ export async function getFeaturedProducts() {
 }
 
 export type RelatedProduct = ProductItem & { source: ProductSource }
+
+export async function getAllProductsWithSource(): Promise<RelatedProduct[]> {
+  const [newArrivals, topSelling] = await Promise.all([
+    getProductsByCategory("newArrivals", 48),
+    getProductsByCategory("topSelling", 48),
+  ])
+
+  return [
+    ...newArrivals.map((p) => ({ ...p, source: "newArrivals" as const })),
+    ...topSelling.map((p) => ({ ...p, source: "topSelling" as const })),
+  ]
+}
+
+/**
+ * Splits the catalog for a dress-style page: products tagged with the style are
+ * featured, the rest fall under "more to explore" so the page stays populated.
+ */
+export async function getProductsForDressStyle(style: DressStyleId): Promise<{
+  primary: RelatedProduct[]
+  more: RelatedProduct[]
+}> {
+  const products = await prisma.product.findMany({
+    orderBy: { createdAt: "desc" },
+  })
+
+  const primary: RelatedProduct[] = []
+  const more: RelatedProduct[] = []
+  for (const product of products) {
+    const mapped: RelatedProduct = {
+      ...mapProductToItem(product),
+      source: categoryToProductSource(product.category),
+    }
+    if (product.dressStyle === style) {
+      primary.push(mapped)
+    } else {
+      more.push(mapped)
+    }
+  }
+
+  return { primary, more }
+}
 
 export async function getRelatedProducts(
   source: ProductSource,

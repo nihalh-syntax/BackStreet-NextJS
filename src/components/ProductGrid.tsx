@@ -4,9 +4,13 @@ import type { ProductSource } from "@/data/productCatalog"
 
 import ProductCard, { type ProductItem } from "./ProductCard"
 
+/** Product that optionally carries its own source for mixed-source grids. */
+type GridProduct = ProductItem & { source?: ProductSource }
+
 type ProductGridProps = {
-  products: ProductItem[]
-  source: ProductSource
+  products: GridProduct[]
+  /** Fallback source for items that don't specify their own. */
+  source?: ProductSource
   className?: string
   /** Grid column classes; default responsive 2–4 columns. */
   gridClassName?: string
@@ -14,6 +18,7 @@ type ProductGridProps = {
 
 /**
  * Reusable responsive grid of product cards linking to product detail routes.
+ * Each item may carry its own `source`; otherwise the grid-level `source` is used.
  */
 const ProductGrid = ({
   products,
@@ -29,13 +34,20 @@ const ProductGrid = ({
           gridClassName,
         )}
       >
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            href={productDetailPath(source, product.id)}
-          />
-        ))}
+        {products.map((product) => {
+          const itemSource = product.source ?? source
+          return (
+            <ProductCard
+              key={`${itemSource ?? "x"}-${product.id}`}
+              product={product}
+              href={
+                itemSource
+                  ? productDetailPath(itemSource, product.id)
+                  : undefined
+              }
+            />
+          )
+        })}
       </div>
     </div>
   )

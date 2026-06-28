@@ -23,6 +23,13 @@ enum ProductCategory {
   topSelling
 }
 
+enum DressStyle {
+  casual
+  formal
+  party
+  gym
+}
+
 model Product {
   id            String          @id @default(cuid())
   slug          String          @unique
@@ -32,6 +39,7 @@ model Product {
   originalPrice Decimal?        @db.Decimal(10, 2)
   rating        Float           @default(4)
   category      ProductCategory
+  dressStyle    DressStyle      @default(casual)
   imageUrl      String
   images        Json
   imagesByColor Json?
