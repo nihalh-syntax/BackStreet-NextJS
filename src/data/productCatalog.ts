@@ -203,11 +203,10 @@ export const TOP_SELLING_FALLBACK: ProductItem[] = [
   },
   {
     id: "top-fallback-3",
-    name: "Loose Fit Bermuda Shorts",
-    imageUrl:
-      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=700&q=80",
-    rating: 3.0,
-    price: 60,
+    name: "Gymshark Fitness Tank Top",
+    imageUrl: "/products/gym-tank-front.png",
+    rating: 4.5,
+    price: 30,
   },
   {
     id: "top-fallback-4",
@@ -216,6 +215,13 @@ export const TOP_SELLING_FALLBACK: ProductItem[] = [
       "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=700&q=80",
     rating: 4.5,
     price: 75,
+  },
+  {
+    id: "top-fallback-5",
+    name: "Hosstile Bodybuilder Tee",
+    imageUrl: "/products/hosstile-tee-front.png",
+    rating: 5.0,
+    price: 35,
   },
 ]
 
@@ -238,6 +244,17 @@ const FLORAL_DRESS_IMAGES = [
   "/products/floral-dress-front.png",
   "/products/floral-dress-detail.png",
   "/products/floral-dress-back.png",
+]
+
+const GYM_TANK_IMAGES = [
+  "/products/gym-tank-front.png",
+  "/products/gym-tank-action.png",
+]
+
+const HOSSTILE_TEE_IMAGES = [
+  "/products/hosstile-tee-front.png",
+  "/products/hosstile-tee-back.png",
+  "/products/hosstile-tee-lifestyle.png",
 ]
 
 /**
@@ -285,6 +302,48 @@ const CUSTOM_DETAILS: Record<string, ProductDetailData> = {
       "Flutter short sleeves and a flattering V-neckline",
       "Elasticated waist with a tiered maxi skirt",
       "Pull-on style with convenient side pockets",
+    ],
+  },
+  "top-fallback-3": {
+    id: "top-fallback-3",
+    name: "Gymshark Fitness Tank Top",
+    imageUrl: "/products/gym-tank-front.png",
+    rating: 4.5,
+    price: 30,
+    images: GYM_TANK_IMAGES,
+    imagesByColor: { black: GYM_TANK_IMAGES },
+    description:
+      "A training-ready tank cut for heavy lifting days, with dropped armholes for an unrestricted range of motion and a lightweight, sweat-wicking fabric that keeps you cool through every set. Finished with the signature Gymshark Fitness print for that classic gym-floor look.",
+    colors: [{ id: "black", label: "Black", hex: "#111111" }],
+    sizes: [...DEFAULT_SIZES],
+    reviews: SAMPLE_REVIEWS,
+    faqs: SAMPLE_FAQS,
+    detailBullets: [
+      "Lightweight, breathable fabric built for training",
+      "Dropped armholes for a full range of motion",
+      "Sweat-wicking with a relaxed gym fit",
+      "Signature Gymshark Fitness chest print",
+    ],
+  },
+  "top-fallback-5": {
+    id: "top-fallback-5",
+    name: "Hosstile Bodybuilder Tee",
+    imageUrl: "/products/hosstile-tee-front.png",
+    rating: 5.0,
+    price: 35,
+    images: HOSSTILE_TEE_IMAGES,
+    imagesByColor: { oxblood: HOSSTILE_TEE_IMAGES },
+    description:
+      "A heavyweight cotton training tee built for the bodybuilder grind. Featuring the Hosstile 'Forever Bodybuilder — No Sacrifice, No Reward' shield print front and back, it pairs an oversized gym-ready cut with soft, durable fabric that holds up set after set.",
+    colors: [{ id: "oxblood", label: "Oxblood", hex: "#5b4038" }],
+    sizes: [...DEFAULT_SIZES],
+    reviews: SAMPLE_REVIEWS,
+    faqs: SAMPLE_FAQS,
+    detailBullets: [
+      "Heavyweight 100% cotton for durability",
+      "Oversized, gym-ready relaxed fit",
+      "Bold Hosstile shield print front and back",
+      "Ribbed crew neck that keeps its shape",
     ],
   },
 }

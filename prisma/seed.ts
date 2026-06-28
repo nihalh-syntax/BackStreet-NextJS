@@ -15,8 +15,9 @@ const DRESS_STYLE_BY_ID: Record<string, DressStyle> = {
   "fallback-4": DressStyle.casual, // Sleeve Striped T-shirt
   "top-fallback-1": DressStyle.formal, // Vertical Striped Shirt
   "top-fallback-2": DressStyle.party, // Courage Graphic T-shirt
-  "top-fallback-3": DressStyle.gym, // Loose Fit Bermuda Shorts
+  "top-fallback-3": DressStyle.gym, // Gymshark Fitness Tank Top
   "top-fallback-4": DressStyle.casual, // Faded Skinny Jeans
+  "top-fallback-5": DressStyle.gym, // Hosstile Bodybuilder Tee
 }
 
 config({ path: ".env.local" })
